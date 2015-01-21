@@ -35,29 +35,31 @@ var ngTableController = ['$scope', 'NgTableParams', '$timeout', function($scope,
         $scope.params.$params.page = 1;
     }
 
-    $scope.$watch('params.$params', function(newParams, oldParams) {
+    if($scope.params.settings().watchParams) {
+        $scope.$watch('params.$params', function (newParams, oldParams) {
 
-        if (newParams === oldParams) {
-            return;
-        }
+            if (newParams === oldParams) {
+                return;
+            }
 
-        $scope.params.settings().$scope = $scope;
+            $scope.params.settings().$scope = $scope;
 
-        if (!angular.equals(newParams.filter, oldParams.filter)) {
-            var maybeResetPage = isFirstTimeLoad ? angular.noop : resetPage;
-            delayFilter(function() {
-                maybeResetPage();
+            if (!angular.equals(newParams.filter, oldParams.filter)) {
+                var maybeResetPage = isFirstTimeLoad ? angular.noop : resetPage;
+                delayFilter(function () {
+                    maybeResetPage();
+                    $scope.params.reload();
+                }, $scope.params.settings().filterDelay);
+            } else {
                 $scope.params.reload();
-            }, $scope.params.settings().filterDelay);
-        } else {
-            $scope.params.reload();
-        }
+            }
 
-        if (!$scope.params.isNullInstance) {
-            isFirstTimeLoad = false;
-        }
+            if (!$scope.params.isNullInstance) {
+                isFirstTimeLoad = false;
+            }
 
-    }, true);
+        }, true);
+    }
 
     $scope.sortBy = function(column, event) {
         var parsedSortable = $scope.parse(column.sortable);
